@@ -1,0 +1,10 @@
+{
+	"name": "Forge/application",
+	"description": "Forge application",
+	"autoload": {
+		"psr-0": {"Forge": "src/"}
+	},
+	"require": {
+		"phpforge/http": "0.0.2"
+	}
+}
