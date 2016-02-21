@@ -35,8 +35,6 @@ class Application extends Base {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
 
-		$this->setTheme('heroic');
-
 		$classmap = new ClassMap();
 		$moddirs = glob(self::getAppDir() . DS . 'modules' . '/*', GLOB_ONLYDIR);
 		if ($moddirs) {
