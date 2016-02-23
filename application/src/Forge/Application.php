@@ -14,7 +14,7 @@ use Forge\Application\Module\ClassMap;
 
 /**
  * Application
- * 
+ *
  * @package    Forge
  * @subpackage Application
  * @author     Benjamin C. Tehan <benjamin.tehan@devforge.org>

@@ -3,6 +3,7 @@
 namespace Forge\Application\Module;
 
 use Forge\Application\View;
+use Forge\Application\Exception;
 
 /**
  * ClassMap
@@ -24,6 +25,7 @@ class ClassMap  {
 	 *
 	 * @param string $dir Directory
 	 *
+	 * @throws \Forge\Application\Exception
 	 * @return array
 	 */
 	public function inherit($dir) {
@@ -47,6 +49,9 @@ class ClassMap  {
 						$phpFiles = new \RegexIterator($srcFiles, self::ISPHP);
 						foreach ($phpFiles as $phpFile) {
 							$class = preg_replace(array(self::ISPHP, '/\//'), array('', '\\'), str_replace($src, '', $phpFile->getPathName()));
+							if (!preg_match('/^' . $key . '/', $class)) {
+								throw new Exception('Module ' . $key . ' should have the same namespace however it\'s declared as ' . $class);
+							}
 							$classmap[$class] = str_replace($dir, '', $phpFile->getPathName());
 						}
 					}
