@@ -172,7 +172,9 @@ class Application extends Base {
 			$requestClass = $request->getRoute()->getClass();
 			foreach($this->getModules() as $module) {
 				if ($requestClass == get_class($module)) {
-					$module->__construct();
+					if (method_exists($module, '__construct')) {
+						$module->__construct();
+					}
 					$this->setModule($module);
 
 					$this->callEvent($this->getModule(), 'init')
@@ -266,8 +268,11 @@ class Application extends Base {
 				}
 			}
 
-			foreach(self::getGlobals() as $key => $value) {
-				$layout->$key = $value;
+			$globals = self::getGlobals();
+			if ($globals) {
+				foreach($globals as $key => $value) {
+					$layout->$key = $value;
+				}
 			}
 
 			$content = $layout->render();
