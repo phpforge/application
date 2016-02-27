@@ -93,7 +93,7 @@ class View {
 	public function save($target) {
 		$fp = fopen($target, 'w');
 		if (fwrite($fp, $this->render()) === FALSE) {
-			throw new View\Exception('Unable to save view');
+			throw new Exception('Unable to save view');
 		}
 		fclose($fp);
 	}

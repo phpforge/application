@@ -14,7 +14,7 @@ use Forge\Http;
  * @copyright  1999-2015 Devforge Inc
  * @abstract
  */
-abstract class Base  {
+abstract class Base {
 
 	/**
 	 * @var string
@@ -27,7 +27,6 @@ abstract class Base  {
 	 * @return string
 	 */
 	public static function getConfig() {
-
 		if (!isset(self::$config)) {
 			$config = include self::getAppDir() . DS . 'configs' . DS . 'application.php';
 			self::$config = json_decode(json_encode($config));
@@ -234,14 +233,14 @@ abstract class Base  {
 	 * @throws Exception
 	 */
 	public static function setTheme($name) {
-		if (file_exists(self::getAppDir() . DS . 'web' .  DS . 'themes' . DS . $name . DS . 'layout.phtml')) {
+		if (file_exists(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml')) {
 			self::$theme = new Theme();
 			self::$theme->setName($name)
-				->setDir(self::getAppDir() . DS . 'web' .  DS . 'themes' . DS . $name)
+				->setDir(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name)
 				->setUrl(self::getAppUrl() . '/themes/' . $name)
-				->setLayout(self::getAppDir() . DS . 'web' .  DS . 'themes' . DS . $name . DS . 'layout.phtml');
+				->setLayout(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml');
 		} else {
-			throw new Exception('Theme dir doesn\'t exist');
+			throw new Exception('Theme dir doesn\'t exist: ' . self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml');
 		}
 	}
 

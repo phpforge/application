@@ -25,8 +25,7 @@ class Request {
 	 *
 	 * @return \Forge\Application\Route
 	 */
-	public function getRoute()
-	{
+	public function getRoute() {
 		return $this->route;
 	}
 
@@ -37,8 +36,7 @@ class Request {
 	 *
 	 * @return \Forge\Application\Request
 	 */
-	public function setRoute(Route $value)
-	{
+	public function setRoute(Route $value) {
 		$this->route = $value;
 		return $this;
 	}
@@ -53,8 +51,7 @@ class Request {
 	 *
 	 * @return \Forge\Application\Theme
 	 */
-	public function getTheme()
-	{
+	public function getTheme() {
 		return $this->theme;
 	}
 
@@ -65,8 +62,7 @@ class Request {
 	 *
 	 * @return \Forge\Application\Request
 	 */
-	public function setTheme(Theme $value)
-	{
+	public function setTheme(Theme $value) {
 		$this->theme = $value;
 		return $this;
 	}
@@ -135,8 +131,7 @@ class Request {
 	 *
 	 * @return array
 	 */
-	public function getParams()
-	{
+	public function getParams() {
 		return $this->params;
 	}
 
@@ -147,10 +142,8 @@ class Request {
 	 *
 	 * @return mixed
 	 */
-	public function getParam($name)
-	{
-		if (isset($this->params[strtolower($name)]))
-		{
+	public function getParam($name) {
+		if (isset($this->params[strtolower($name)])) {
 			return $this->params[strtolower($name)];
 		}
 		return false;
@@ -159,13 +152,12 @@ class Request {
 	/**
 	 * Set param
 	 *
-	 * @param string $name Name
+	 * @param string $name  Name
 	 * @param mixed  $value Value
 	 *
 	 * @return \Forge\Application\Request
 	 */
-	public function setParam($name, $value)
-	{
+	public function setParam($name, $value) {
 		$this->params[strtolower($name)] = $value;
 		return $this;
 	}

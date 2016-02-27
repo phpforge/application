@@ -12,11 +12,11 @@ use Forge\Application\Module;
  * @author     Benjamin C. Tehan <benjamin.tehan@devforge.org>
  * @copyright  1999-2015 Devforge Inc
  */
-class Route  {
+class Route {
 
-    /**
-     * @var string
-     */
+	/**
+	 * @var string
+	 */
 	protected $class;
 
 	/*
@@ -40,9 +40,9 @@ class Route  {
 		return $this->class;
 	}
 
-    /**
-     * @var string
-     */
+	/**
+	 * @var string
+	 */
 	protected $method;
 
 	/*
@@ -64,9 +64,9 @@ class Route  {
 		return $this->method;
 	}
 
-    /**
-     * @var string
-     */
+	/**
+	 * @var string
+	 */
 	protected $requestMethod;
 
 	/*
@@ -88,9 +88,9 @@ class Route  {
 		return $this->requestMethod;
 	}
 
-    /**
-     * @var array
-     */
+	/**
+	 * @var array
+	 */
 	protected $urls = array();
 
 	/*
@@ -123,9 +123,9 @@ class Route  {
 		$this->urls[] = $url;
 	}
 
-    /**
-     * @var Forge\Application\Module
-     */
+	/**
+	 * @var Forge\Application\Module
+	 */
 	protected $module;
 
 	/*
@@ -133,8 +133,7 @@ class Route  {
 	 *
 	 * @return Forge\Application\Module
 	 */
-	public function getModule()
-	{
+	public function getModule() {
 		return $this->module;
 	}
 
@@ -144,8 +143,7 @@ class Route  {
 	 * @return Forge\Application\Module
 	 * @return self
 	 */
-	public function setModule(Module $value)
-	{
+	public function setModule(Module $value) {
 		$this->module = $value;
 		return $this;
 	}
