@@ -35,14 +35,26 @@ class Application extends Base {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
 
+		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'modules');
+		$this->setModules(Loader::load($loader));
+		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
+	}
+
+	/**
+	 * Directory Class Loader
+	 *
+	 * @param type $loader   Class Loader
+	 * @param type $classDir Class Directory to Search
+	 */
+	private function directoryClassLoader(&$loader, $classDir)
+	{
 		$classmap = new ClassMap();
-		$moddirs = glob(self::getAppDir() . DS . 'modules' . '/*', GLOB_ONLYDIR);
-		if ($moddirs) {
-			foreach ($moddirs as $moddir) {
-				$loader->addClassMap($classmap->inherit($moddir));
+		$dirs = glob($classDir . '/*', GLOB_ONLYDIR);
+		if ($dirs) {
+			foreach ($dirs as $dir) {
+				$loader->addClassMap($classmap->inherit($dir));
 			}
 		}
-		$this->setModules(Loader::load($loader));
 	}
 
 	/**
@@ -144,7 +156,6 @@ class Application extends Base {
 
 		$this->setRequest($request);
 		$class = $this->getRequest()->getRoute()->getClass();
-
 		if (!class_exists($class)) {
 			$render = new Exception('Module ' . strtolower($class) . ' does not exist', Http::STATUS_CODE_404);
 		} else {
@@ -152,8 +163,8 @@ class Application extends Base {
 			$this->setModule($module);
 
 			$this->callEvent($this->getModule(), 'init')
-					->callEvent($this->getModule(), 'request', $this->getRequest())
-					->callEvent($this->getModule(), 'route', $this->getRequest()->getRoute());
+				->callEvent($this->getModule(), 'request', $this->getRequest())
+				->callEvent($this->getModule(), 'route', $this->getRequest()->getRoute());
 
 			$method = $this->getRequest()->getRoute()->getMethod();
 			if (!method_exists($this->getModule(), $method)) {
