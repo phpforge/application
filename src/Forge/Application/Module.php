@@ -96,6 +96,16 @@ abstract class Module extends View {
 	}
 
 	/**
+	 * Set Global
+	 *
+	 * @param string $key   Key
+	 * @param string $value Value
+	 */
+	public function setGlobal($key, $value) {
+		Application::setGlobal($key, $value);
+	}
+
+	/**
 	 * @var \Forge\Application\Route[]
 	 */
 	private $routes;

@@ -94,7 +94,7 @@ abstract class Base {
 	 * @param string $name   Function name
 	 */
 	protected static function callGlobalEvent($module, $name) {
-		$method = 'global' . ucfirst($name);
+		$method = ucfirst($name);
 		if (method_exists($module, $method)) {
 			call_user_func_array(array($module, $method), array_slice(func_get_args(), 2));
 		}
@@ -318,5 +318,48 @@ abstract class Base {
 	 */
 	protected function getContent() {
 		return $this->content;
+	}
+
+	/**
+	 * @var array
+	 */
+	protected static $global;
+
+	/**
+	 * Get Global
+	 *
+	 * @param string $key Key
+	 *
+	 * @return mixed
+	 */
+	public static function getGlobal($key) {
+		if (isset(self::$global[$key])) {
+			return self::$global[$key];
+		}
+		return false;
+	}
+
+	/**
+	 * Get Globals
+	 *
+	 * @return array
+	 */
+	public static function getGlobals() {
+		return self::$global;
+	}
+
+	/**
+	 * Set Global
+	 *
+	 * @param string $key   Key
+	 * @param mixed  $value Value
+	 *
+	 * @throws Exception
+	 */
+	public static function setGlobal($key, $value) {
+		if (isset(self::$global[$key])) {
+			throw new Exception('Application global ' . $key . ' has already been specified');
+		}
+		self::$global[$key] = $value;
 	}
 }

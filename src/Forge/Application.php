@@ -30,7 +30,7 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function __construct(ClassLoader $loader) {
-		session_start();
+
 		if (empty($loader->getClassMap())) {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
@@ -38,6 +38,14 @@ class Application extends Base {
 		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'modules');
 		$this->setModules(Loader::load($loader));
 		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
+
+		if (session_status() == PHP_SESSION_NONE) {
+			session_start();
+		}
+
+		foreach($this->getModules() as $module) {
+			self::callGlobalEvent($module, 'bootstrap');
+		}
 	}
 
 	/**
@@ -159,42 +167,51 @@ class Application extends Base {
 		if (!class_exists($class)) {
 			$render = new Exception('Module ' . strtolower($class) . ' does not exist', Http::STATUS_CODE_404);
 		} else {
-			$module = new $class();
-			$this->setModule($module);
 
-			$this->callEvent($this->getModule(), 'init')
-				->callEvent($this->getModule(), 'request', $this->getRequest())
-				->callEvent($this->getModule(), 'route', $this->getRequest()->getRoute());
+			$module = null;
+			$requestClass = $request->getRoute()->getClass();
+			foreach($this->getModules() as $module) {
+				if ($requestClass == get_class($module)) {
+					$module->__construct();
+					$this->setModule($module);
 
-			$method = $this->getRequest()->getRoute()->getMethod();
-			if (!method_exists($this->getModule(), $method)) {
-				// Should never happen since if we find a module we default to /
-				throw new Exception('Module ' . strtolower($class) . ' does not have method ' . $method, Http::STATUS_CODE_404);
-			} else {
-				$this->callEvent($this->getModule(), 'preAction');
+					$this->callEvent($this->getModule(), 'init')
+						->callEvent($this->getModule(), 'request', $this->getRequest())
+						->callEvent($this->getModule(), 'route', $this->getRequest()->getRoute());
 
-				$result = $module->$method();
-				$this->callEvent($this->getModule(), 'postAction');
+					$method = $this->getRequest()->getRoute()->getMethod();
+					if (!method_exists($this->getModule(), $method)) {
+						// Should never happen since if we find a module we default to /
+						throw new Exception('Module ' . strtolower($class) . ' does not have method ' . $method, Http::STATUS_CODE_404);
+					} else {
+						$this->callEvent($this->getModule(), 'preAction');
 
-				if ($result instanceof View) {
-					$render = $result->render();
-				} else if ($result) {
-					$this->setContent($result)
-						->disableTheme();
-				} else if ($module instanceof View) {
-					$template = $module->getTemplate();
-					if ($template) {
-						if (file_exists($template)) {
-							$module->setTemplate($template);
-							$render = $this->getModule()->render();
+						$result = $module->$method();
+						$this->callEvent($this->getModule(), 'postAction');
+
+						if ($result instanceof View) {
+							$render = $result->render();
+						} else if ($result) {
+							$this->setContent($result)
+								->disableTheme();
+						} else if ($module instanceof View) {
+							$template = $module->getTemplate();
+							if ($template) {
+								if (file_exists($template)) {
+									$module->setTemplate($template);
+									$render = $this->getModule()->render();
+								}
+							}
+						}
+
+						if (isset($render)) {
+							$this->setContent($render);
 						}
 					}
-				}
-
-				if (isset($render)) {
-					$this->setContent($render);
+					break;
 				}
 			}
+
 		}
 
 		return $this;
@@ -247,6 +264,10 @@ class Application extends Base {
 				} else {
 					$layout->$key = $value;
 				}
+			}
+
+			foreach(self::getGlobals() as $key => $value) {
+				$layout->$key = $value;
 			}
 
 			$content = $layout->render();

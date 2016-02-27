@@ -37,7 +37,6 @@ class Loader extends Base {
 						$mod = $ref->newInstanceWithoutConstructor();
 						if ($mod instanceof Module) {
 							$mods[$class] = array ('mod' => $mod, 'ref' => $ref);
-							self::callGlobalEvent($mod, 'config');
 						}
 					}
 				}
@@ -47,7 +46,6 @@ class Loader extends Base {
 		$modules = array();
 		foreach ($mods as $class => $moddata) {
 			$mod = $moddata['mod'];
-			self::callGlobalEvent($mod, 'bootstrap');;
 
 			$routemap = array();
 			$methods = $moddata['ref']->getMethods(\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_FINAL);
