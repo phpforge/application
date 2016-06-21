@@ -144,7 +144,7 @@ abstract class Module extends View {
 			if (!file_exists($view)) {
 				throw new Exception('View directory does not exist: ' . $view, Http::STATUS_CODE_404);
 			}
-			$this->template = $view . DS . preg_replace('/post|get|put|delete$/', '', strtolower($this->getRequest()->getRoute()->getMethod())) . '.' . strtolower(filter_input(INPUT_SERVER, 'REQUEST_METHOD'));
+			$this->template = $view . DS . preg_replace('/(post|get|put|delete)$/', '', strtolower($this->getRequest()->getRoute()->getMethod())) . '.' . strtolower(filter_input(INPUT_SERVER, 'REQUEST_METHOD'));
 		}
 		return $this->template;
 	}
