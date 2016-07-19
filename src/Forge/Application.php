@@ -2,7 +2,6 @@
 
 namespace Forge;
 
-use Composer\Autoload\ClassLoader;
 use Forge\Http;
 use Forge\Application\Exception;
 use Forge\Application\Base;
@@ -11,6 +10,7 @@ use Forge\Application\Theme;
 use Forge\Application\View;
 use Forge\Application\Module\Loader;
 use Forge\Application\Module\ClassMap;
+use Composer\Autoload\ClassLoader;
 
 /**
  * Application

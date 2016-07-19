@@ -109,13 +109,10 @@ abstract class Base {
 	 */
 	public static function callHook($name) {
 		$results = array();
-		foreach (self::getModules() as $module) {
-			foreach ($module->getRoutes() as $route) {
-				$module = $route->getModule();
-				$method = 'hook' . ucfirst($name);
-				if (method_exists($module, $method)) {
-					$results = array_replace_recursive(call_user_func_array(array($module, $method), array_slice(func_get_args(), 1)), $results);
-				}
+		$method = 'hook' . ucfirst($name);
+		foreach (self::getModules() as $module) {	
+			if (method_exists($module, $method)) {
+				$results = array_replace_recursive(call_user_func_array(array($module, $method), array_slice(func_get_args(), 1)), $results);
 			}
 		}
 		return $results;

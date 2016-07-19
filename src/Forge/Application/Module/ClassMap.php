@@ -29,7 +29,6 @@ class ClassMap  {
 	 * @return array
 	 */
 	public function inherit($dir) {
-
 		$classmap = array();
 		$composer = $dir . DS . self::COMPOSER;
 		$autoloadClassmap = $dir . DS . self::CLASSMAP;
@@ -38,6 +37,7 @@ class ClassMap  {
 			$content = include $autoloadClassmap;
 			$classmap = array_merge($classmap, $content);
 		} else if (file_exists($composer)) {
+			set_include_path(get_include_path() . PATH_SEPARATOR . $dir);
 			$json = json_decode(file_get_contents($composer));
 			if (isset($json->autoload)) {
 				if (isset($json->autoload->{'psr-0'})) {

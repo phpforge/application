@@ -213,4 +213,15 @@ abstract class Module extends View {
 		}
 		return $this->name;
 	}
+
+	/**
+	 * Call Hook
+	 *
+	 * @param string $name hook Call
+	 *
+	 * @return mixed
+	 */
+	public function callHook() {
+		return forward_static_call_array('Forge\Application::callHook', func_get_args());
+	}
 }

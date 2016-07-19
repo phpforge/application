@@ -146,6 +146,10 @@ class Request {
 		if (isset($this->params[strtolower($name)])) {
 			return $this->params[strtolower($name)];
 		}
+
+		if (isset($_REQUEST[$name])) {
+			return $_REQUEST[$name];
+		}
 		return false;
 	}
 

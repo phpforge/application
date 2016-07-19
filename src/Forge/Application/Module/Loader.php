@@ -25,9 +25,8 @@ class Loader extends Base {
 	 * @return array
 	 */
 	public static function load(ClassLoader $loader) {
-		$mods = array();
+		$modules = array();
 		$classmap = $loader->getClassMap();
-
 		foreach ($classmap as $class => $file) {
 			if (preg_match('/^phpforge|forge|devforge|module/i', $class) || preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
 
