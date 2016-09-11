@@ -165,4 +165,29 @@ class Request {
 		$this->params[strtolower($name)] = $value;
 		return $this;
 	}
+
+	private $request;
+
+	public function getVariable($name, $filer = FILTER_DEFAULT, $options = array()) {
+		if (key_exists($name, $this->request)) {
+			return  filter_var($this->request[$name], $filer, $options);
+		}
+		return null;
+	}
+
+	public function __construct() {
+		$method = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+		switch ($method) {
+		case 'GET':
+			$this->request = $_GET;
+			break;
+		case 'POST':
+			$this->request = $_POST;
+			break;
+		case 'PUT':
+		case 'DELETE':
+			parse_str(file_get_contents('php://input'), $this->request);
+			break;
+		}
+	}
 }

@@ -140,7 +140,8 @@ abstract class Module extends View {
 	 */
 	public function getTemplate() {
 		if (!$this->template) {
-			$view = $this->getDir() . DS . 'view';
+			$view = $this->getDir() . DS . 'Template';
+
 			if (!file_exists($view)) {
 				throw new Exception('View directory does not exist: ' . $view, Http::STATUS_CODE_404);
 			}
@@ -162,7 +163,7 @@ abstract class Module extends View {
 	public function getDir() {
 		if (!$this->dir) {
 			$rc = $this->getReflectionClass();
-			$this->dir = dirname($rc->getFileName());
+			$this->dir = dirname($rc->getFileName()) . DS . $rc->getShortName();
 		}
 		return $this->dir;
 	}

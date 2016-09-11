@@ -100,6 +100,49 @@ abstract class Base {
 		}
 	}
 
+//	/**
+//	 * Call hook function
+//	 *
+//	 * @param string $name Function name
+//	 *
+//	 * @return array
+//	 */
+//	public static function callOrigHook($name) {
+//		$results = array();
+//		$method = 'hook' . ucfirst($name);
+//		foreach (self::getModules() as $module) {
+//			if (method_exists($module, $method)) {
+//				$results = array_replace_recursive(call_user_func_array(array($module, $method), array_slice(func_get_args(), 1)), $results);
+//			}
+//		}
+//		return $results;
+//	}
+
+	/**
+	 * Call hook function
+	 *
+	 * @param string $name Function name
+	 *
+	 * @return array
+	 */
+	public static function callArrayHook($name) {
+		$results = array();
+		$method = 'hook' . ucfirst($name);
+		foreach (self::getModules() as $module) {
+			if (method_exists($module, $method)) {
+				$result = call_user_func_array(array($module, $method), array_slice(func_get_args(), 1));
+				
+				foreach ($result as &$value) {
+					if (is_object($value)) {
+						$value = $value->toArray();
+					}
+				}
+				$results = array_replace_recursive($result, $results);
+			}
+		}
+		return $results;
+	}
+
 	/**
 	 * Call hook function
 	 *
@@ -117,6 +160,43 @@ abstract class Base {
 		}
 		return $results;
 	}
+
+//	public static function merge($merged, $data) {
+//		if (is_object($data)) {
+//			$results = array_merge($merged, get_object_vars($data));
+//		}
+//		return $results;
+//
+//
+////echo 'gere<br />';
+////		if (is_array($data)) {
+////			foreach ($data as $key => $value) {
+////echo 'array: ' . $key . '<br />';
+////				if (is_array($value)) {
+////					$results[$key] = self::merge($results, $value);
+////				} else if (is_object($value)) {
+////
+////					array_merge(get_object_vars($a[$key]), get_object_vars($b[$key]));
+////
+//////foreach ($value as $okey => $ovalue) {
+//////
+//////}
+////
+////echo 'class<br />';
+////echo '<pre>';
+////print_r($value);
+////echo '</pre>';
+////				} else {
+////					$results[$key] = $value;
+////				}
+////			}
+////		} else {
+////echo $key . '<br />';
+////			$results[$key] = $value;
+////		}
+//
+//		return $results;
+//	}
 
 	/**
 	 * @var string

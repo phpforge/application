@@ -29,19 +29,18 @@ class Loader extends Base {
 		$classmap = $loader->getClassMap();
 		foreach ($classmap as $class => $file) {
 			if (preg_match('/^phpforge|forge|devforge|module/i', $class) || preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
-
 				if (class_exists($class)) {
 					$ref = new \ReflectionClass($class);
 					if ($ref->IsInstantiable()) {
 						$mod = $ref->newInstanceWithoutConstructor();
 						if ($mod instanceof Module) {
 							$routemap = array();
-							$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_FINAL);
+							$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
 							foreach($methods as $method) {
 								if (preg_match('/Post|Get|Put|Delete$/', $method->name)) {
 									$methodName = preg_replace('/Post|Get|Put|Delete$/', '', $method->name);
 									$methodType = strtoupper(preg_replace('/.*(Post|Get|Put|Delete)$/', '$1', $method->name));
-									if ($method->class == $class) {
+									// if ($method->class == $class) {
 										$urls = array();
 										if (strtolower($methodName) == strtolower($ref->getShortName())) {
 											if (strtolower($method->class) == strtolower(self::$defaultModule) && $methodType == 'GET') {
@@ -55,14 +54,14 @@ class Loader extends Base {
 										if (!preg_match('/^(event|global|hook)/', $methodName)) {
 
 											$route = new Route();
-											$route->setClass($method->class)
+											$route->setClass($class)
 												->setMethod($method->name)
 												->setRequestMethod($methodType)
 												->setUrls($urls);
 
 											$routemap[] = $route;
 										}
-									}
+									// }
 								}
 							}
 

@@ -6,7 +6,7 @@ use Forge\Application\Module;
 
 /**
  * Route model
- * 
+ *
  * @package    Forge
  * @subpackage Application
  * @author     Benjamin C. Tehan <benjamin.tehan@devforge.org>

@@ -21,7 +21,6 @@ use Composer\Autoload\ClassLoader;
  * @copyright  1999-2015 Devforge Inc
  */
 class Application extends Base {
-
 	/**
 	 * Construct
 	 *
@@ -30,7 +29,6 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function __construct(ClassLoader $loader) {
-
 		if (empty($loader->getClassMap())) {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
@@ -43,7 +41,7 @@ class Application extends Base {
 			session_start();
 		}
 
-		foreach($this->getModules() as $module) {
+		foreach ($this->getModules() as $module) {
 			self::callGlobalEvent($module, 'bootstrap');
 		}
 	}
@@ -54,8 +52,7 @@ class Application extends Base {
 	 * @param type $loader   Class Loader
 	 * @param type $classDir Class Directory to Search
 	 */
-	private function directoryClassLoader(&$loader, $classDir)
-	{
+	private function directoryClassLoader(&$loader, $classDir) {
 		$classmap = new ClassMap();
 		$dirs = glob($classDir . '/*', GLOB_ONLYDIR);
 		if ($dirs) {
@@ -84,7 +81,7 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function direct($requestUri, $requestMethod) {
-		$request = $this->buildRequest($requestUri, $requestMethod, $this->getConfig()->routing->depth);
+		$request = $this->buildRequest($requestUri, $requestUri, $requestMethod, $this->getConfig()->routing->depth);
 		if ($request instanceof Request) {
 			return $this->build($request);
 		} else {
@@ -101,36 +98,22 @@ class Application extends Base {
 	 *
 	 * @return mixed
 	 */
-	private function buildRequest($requestUri, $requestMethod, $depth = 3) {
-		$full = preg_replace('/\?.*$/', '', $requestUri);
-		if ($depth == 0) {
-			// Probably throw error here if $full is not /
-			$uri = $full;
-		} else {
-			$exp = '/(\/[^\/]*){1,' . $depth . '}/';
-			$matches = array();
-			if ($full == '/') {
-				$uri = '/';
-			} else if (preg_match($exp, $full, $matches)) {
-				$uri = $matches[0];
-			}
-		}
-
+	private function buildRequest($originalUri, $requestUri, $requestMethod) {
+		$uri = preg_replace(array('/\?.*$/', '/[\/]?$/'), '', $requestUri);
 		foreach ($this->getModules() as $module) {
 			foreach ($module->getRoutes() as $route) {
-				if ($route->getRequestMethod() == $requestMethod) {
+				if ($route->getRequestMethod() === $requestMethod) {
 					foreach ($route->getUrls() as $url) {
-						if (strtolower($url) == strtolower($uri)) {
+						if (strtolower($url) === strtolower(!empty($uri) ? $uri : '/')) {
 
 							$request = new Request();
 							$request->setRoute($route)
 								->setRouteUrl($url)
-								->setUrl($full);
-
-							$request->setTheme(self::getTheme());
+								->setUrl($originalUri)
+								->setTheme(self::getTheme());
 
 							$exp = '/(\/?[^\/]*){1,2}/';
-							if (preg_match_all($exp, preg_replace('/^' . str_replace('/', '\/', $url) . '/', '', $full), $matches)) {
+							if (preg_match_all($exp, preg_replace('/^' . str_replace('/', '\/', $url) . '/', '', $originalUri), $matches)) {
 								foreach ($matches[0] as $kvp) {
 									list ($key, $value) = array_pad(explode('/', preg_replace('/^\//', '', $kvp), 2), 2, null);
 									if (!empty($key)) {
@@ -145,8 +128,10 @@ class Application extends Base {
 				}
 			}
 		}
-		if ($depth > 0) {
-			return $this->buildRequest($requestUri, $requestMethod, $depth - 1);
+
+		$nextUri = preg_replace('/\/[^\/]+$/', '', $requestUri);
+		if (!empty($nextUri)) {
+			return $this->buildRequest($originalUri, $nextUri, $requestMethod);
 		}
 
 		return null;
@@ -161,16 +146,14 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function build(Request $request) {
-
 		$this->setRequest($request);
 		$class = $this->getRequest()->getRoute()->getClass();
 		if (!class_exists($class)) {
 			$render = new Exception('Module ' . strtolower($class) . ' does not exist', Http::STATUS_CODE_404);
 		} else {
-
 			$module = null;
 			$requestClass = $request->getRoute()->getClass();
-			foreach($this->getModules() as $module) {
+			foreach ($this->getModules() as $module) {
 				if ($requestClass == get_class($module)) {
 					if (method_exists($module, '__construct')) {
 						$module->__construct();
@@ -241,16 +224,13 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function render() {
-
+		$content = '';
 		$this->callEvent($this->getModule(), 'preRender');
 		$theme = self::getTheme();
-		$content = '';
 
 		if ($this->isThemeEnabled() && $theme instanceof Theme) {
-
 			$layout = new View();
 			$layout->setTemplate($theme->getLayout());
-
 			$layout->config = $this->getConfig();
 			$layout->request = $this->getRequest();
 			$layout->theme = $theme;
