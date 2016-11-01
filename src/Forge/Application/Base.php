@@ -68,10 +68,28 @@ abstract class Base {
 		return self::$moddir;
 	}
 
+
 	/**
 	 * @var string
 	 */
-	protected static $appurl;
+	protected static $baseUri;
+
+	/**
+	 * Get application URI
+	 *
+	 * @return string
+	 */
+	public static function getBaseUri() {
+		if (!self::$baseUri) {
+			self::$baseUri = preg_replace('/\/index.php$/', '', filter_input(INPUT_SERVER, 'PHP_SELF'));
+		}
+		return self::$baseUri;
+	}
+
+	/**
+	 * @var string
+	 */
+	protected static $appUrl;
 
 	/**
 	 * Get application URL
@@ -79,12 +97,11 @@ abstract class Base {
 	 * @return string
 	 */
 	public static function getAppUrl() {
-		if (!self::$appurl) {
-			$baseurl = preg_replace('/\/index.php$/', '', filter_input(INPUT_SERVER, 'PHP_SELF'));
+		if (!self::$appUrl) {
 			$port = filter_input(INPUT_SERVER, 'SERVER_PORT');
-			self::$appurl = (($port == Http::STANDARD_HTTPS_PORT) ? 'https' : 'http') . '://' . filter_input(INPUT_SERVER, 'SERVER_NAME') . (($port == Http::STANDARD_HTTP_PORT || $port == Http::STANDARD_HTTPS_PORT) ? '' : ':' . $port) . $baseurl;
+			self::$appUrl = (($port == Http::STANDARD_HTTPS_PORT) ? 'https' : 'http') . '://' . filter_input(INPUT_SERVER, 'SERVER_NAME') . (($port == Http::STANDARD_HTTP_PORT || $port == Http::STANDARD_HTTPS_PORT) ? '' : ':' . $port) . self::getBaseUri();
 		}
-		return self::$appurl;
+		return self::$appUrl;
 	}
 
 	/**
@@ -100,24 +117,6 @@ abstract class Base {
 		}
 	}
 
-//	/**
-//	 * Call hook function
-//	 *
-//	 * @param string $name Function name
-//	 *
-//	 * @return array
-//	 */
-//	public static function callOrigHook($name) {
-//		$results = array();
-//		$method = 'hook' . ucfirst($name);
-//		foreach (self::getModules() as $module) {
-//			if (method_exists($module, $method)) {
-//				$results = array_replace_recursive(call_user_func_array(array($module, $method), array_slice(func_get_args(), 1)), $results);
-//			}
-//		}
-//		return $results;
-//	}
-
 	/**
 	 * Call hook function
 	 *
@@ -131,7 +130,7 @@ abstract class Base {
 		foreach (self::getModules() as $module) {
 			if (method_exists($module, $method)) {
 				$result = call_user_func_array(array($module, $method), array_slice(func_get_args(), 1));
-				
+
 				foreach ($result as &$value) {
 					if (is_object($value)) {
 						$value = $value->toArray();
@@ -153,50 +152,13 @@ abstract class Base {
 	public static function callHook($name) {
 		$results = array();
 		$method = 'hook' . ucfirst($name);
-		foreach (self::getModules() as $module) {	
+		foreach (self::getModules() as $module) {
 			if (method_exists($module, $method)) {
 				$results = array_replace_recursive(call_user_func_array(array($module, $method), array_slice(func_get_args(), 1)), $results);
 			}
 		}
 		return $results;
 	}
-
-//	public static function merge($merged, $data) {
-//		if (is_object($data)) {
-//			$results = array_merge($merged, get_object_vars($data));
-//		}
-//		return $results;
-//
-//
-////echo 'gere<br />';
-////		if (is_array($data)) {
-////			foreach ($data as $key => $value) {
-////echo 'array: ' . $key . '<br />';
-////				if (is_array($value)) {
-////					$results[$key] = self::merge($results, $value);
-////				} else if (is_object($value)) {
-////
-////					array_merge(get_object_vars($a[$key]), get_object_vars($b[$key]));
-////
-//////foreach ($value as $okey => $ovalue) {
-//////
-//////}
-////
-////echo 'class<br />';
-////echo '<pre>';
-////print_r($value);
-////echo '</pre>';
-////				} else {
-////					$results[$key] = $value;
-////				}
-////			}
-////		} else {
-////echo $key . '<br />';
-////			$results[$key] = $value;
-////		}
-//
-//		return $results;
-//	}
 
 	/**
 	 * @var string

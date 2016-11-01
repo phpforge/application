@@ -28,45 +28,6 @@ abstract class Module extends View {
 	}
 
 	/**
-	 * Get application directory
-	 *
-	 * @return string
-	 */
-	public function getAppDir() {
-		return Application::getAppDir();
-	}
-
-	/**
-	 * Get application URL
-	 *
-	 * @return string
-	 */
-	public function getAppUrl() {
-		return Application::getAppUrl();
-	}
-
-	/**
-	 * Get session
-	 *
-	 * @param string $key Session key
-	 *
-	 * @return mixed
-	 */
-	public function getSession($key) {
-		return Application::getSession($key);
-	}
-
-	/**
-	 * Set session
-	 *
-	 * @param string $key   Key
-	 * @param mixed  $value Value
-	 */
-	public function setSession($key, $value) {
-		return Application::setSession($key, $value);
-	}
-
-	/**
 	 * Set theme
 	 *
 	 * @param string $name Theme name

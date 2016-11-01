@@ -2,6 +2,8 @@
 
 namespace Forge\Application;
 
+use Forge\Application;
+
 /**
  * View
  *
@@ -11,6 +13,54 @@ namespace Forge\Application;
  * @copyright  1999-2015 Devforge Inc
  */
 class View {
+
+	/**
+	 * Get application directory
+	 *
+	 * @return string
+	 */
+	public function getAppDir() {
+		return Application::getAppDir();
+	}
+
+	/**
+	 * Get base URI
+	 *
+	 * @return string
+	 */
+	public function getBaseUri() {
+		return Application::getBaseUri();
+	}
+	
+	/**
+	 * Get application URL
+	 *
+	 * @return string
+	 */
+	public function getAppUrl() {
+		return Application::getAppUrl();
+	}
+
+	/**
+	 * Get session
+	 *
+	 * @param string $key Session key
+	 *
+	 * @return mixed
+	 */
+	public function getSession($key) {
+		return Application::getSession($key);
+	}
+
+	/**
+	 * Set session
+	 *
+	 * @param string $key   Key
+	 * @param mixed  $value Value
+	 */
+	public function setSession($key, $value) {
+		return Application::setSession($key, $value);
+	}
 
 	/**
 	 * @var string

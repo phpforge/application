@@ -25,6 +25,7 @@ class Loader extends Base {
 	 * @return array
 	 */
 	public static function load(ClassLoader $loader) {
+		$routes = array();
 		$modules = array();
 		$classmap = $loader->getClassMap();
 		foreach ($classmap as $class => $file) {
@@ -34,6 +35,27 @@ class Loader extends Base {
 					if ($ref->IsInstantiable()) {
 						$mod = $ref->newInstanceWithoutConstructor();
 						if ($mod instanceof Module) {
+// Get additional routing
+if (method_exists($mod, 'routes')) {
+	$menus = $mod->routes();
+	foreach ($mod->routes() as $key => $value) {
+		if (key_exists($value, $routes)) {
+			$routes[$value] = array_merge_recursive($routes[$value], array($key));
+		} else {
+			$routes[$value] = array($key);
+		}
+	}
+}
+
+// Get routing from menus
+if (method_exists($mod, 'menus')) {
+	$menus = $mod->menus();
+	foreach ($menus as $key => $value) {
+		$routes = array_merge_recursive($value->getRoutesRecursive(), $routes);
+	}
+}
+
+
 							$routemap = array();
 							$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
 							foreach($methods as $method) {
@@ -72,6 +94,20 @@ class Loader extends Base {
 				}
 			}
 		}
+
+		// Add extra routes to module routing
+		foreach ($routes as $action => $route) {
+			if (!empty($route)) {
+				foreach ($modules as $module) {
+					foreach ($module->getRoutes() as &$urls) {
+						if (in_array($action, $urls->getUrls())) {
+							$urls->setUrls(array_merge($urls->getUrls(), $route));	
+						}
+					}
+				}
+			}
+		}
+
 		return $modules;
 	}
 }

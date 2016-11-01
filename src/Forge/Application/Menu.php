@@ -59,6 +59,24 @@ class Menu {
 		return $this;
 	}
 
+	public function hasChildren() {
+		if (!empty($this->children)) {
+			return true;
+		}
+		return false;
+	}
+
+	protected $routes;
+
+	public function getRoutes() {
+		return $this->routes;
+	}
+
+	public function setRoutes($routes) {
+		$this->routes = $routes;
+		return $this;
+	}
+
 	protected $class;
 
 	public function getClass() {
@@ -70,13 +88,36 @@ class Menu {
 		return $this;
 	}
 
-	public function __construct($title, $children = array(), $uri = '#', $class='', $priority = 0, $group = 'default') {
+	public function __construct($title, $children = array(), $uri = '#', $routes = array(), $class='', $priority = 0, $group = 'default') {
 		$this->setTitle($title)
 			->setUri($uri)
+			->setRoutes($routes)
 			->setClass($class)
 			->setPriority($priority)
 			->setGroup($group)
 			->setChildren($children);
+	}
+
+	public function getRoutesRecursive() {
+		$routes = array();
+		if ($this->hasChildren()) {
+			$children = $this->getChildren();
+			foreach ($children as $child) {
+				$routes = array_merge_recursive($child->getRoutesRecursive(), $routes);
+			}
+		}
+
+		$route = $this->getRoutes();
+		if (is_array($route)) {
+			$results = array($this->getUri() => $route);
+		} else {
+			$results = array($this->getUri() => array($route));
+		}
+
+		if (!empty($routes)) {
+			$results = array_merge_recursive($results, $routes);			
+		}
+		return $results;
 	}
 
 	/**

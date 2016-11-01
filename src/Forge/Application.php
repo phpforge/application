@@ -104,7 +104,7 @@ class Application extends Base {
 			foreach ($module->getRoutes() as $route) {
 				if ($route->getRequestMethod() === $requestMethod) {
 					foreach ($route->getUrls() as $url) {
-						if (preg_replace('/\/$/', '', strtolower(BASE_URI . $url)) === strtolower(!empty($uri) ? $uri : '')) {
+						if (strtolower($url) === strtolower(!empty($uri) ? $uri : '/')) {
 
 							$request = new Request();
 							$request->setRoute($route)
@@ -129,9 +129,9 @@ class Application extends Base {
 			}
 		}
 
-		if ($requestUri !== '/') {
-			$nextUri = preg_replace('/\/[^\/]+$/', '', $requestUri);
-			return $this->buildRequest($originalUri, (!empty($nextUri) ? $nextUri : '/'), $requestMethod);
+		$nextUri = preg_replace('/\/[^\/]+$/', '', $requestUri);
+		if (!empty($nextUri)) {
+			return $this->buildRequest($originalUri, $nextUri, $requestMethod);
 		}
 
 		return null;
