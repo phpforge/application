@@ -8,6 +8,7 @@ use Forge\Application\Base;
 use Forge\Application\Request;
 use Forge\Application\Theme;
 use Forge\Application\View;
+use Forge\Application\Menu;
 use Forge\Application\Module\Loader;
 use Forge\Application\Module\ClassMap;
 use Composer\Autoload\ClassLoader;
@@ -33,16 +34,61 @@ class Application extends Base {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
 
-		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'modules');
-		$this->setModules(Loader::load($loader));
-		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
-
 		if (session_status() == PHP_SESSION_NONE) {
 			session_start();
 		}
 
-		foreach ($this->getModules() as $module) {
-			self::callGlobalEvent($module, 'bootstrap');
+		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'modules');
+		$this->setModules(Loader::load($loader));
+		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
+
+		$routing = array();
+		foreach ($this->getModules() as $mod) {
+			// Get routing from menus
+			if (method_exists($mod, 'menus')) {
+				$menus = array();
+				foreach ($mod->menus() as $name => $menu) {
+					foreach ($menu as $key => $value) {
+						$routing['GET'] = array_merge_recursive($value->getRoutesRecursive(), $routing);
+						if ($value instanceof Menu) {
+							$menus[$name][$key] = $value->toArray();
+						}
+					}
+				}
+				$this->menus = array_replace_recursive($menus, $this->menus);
+			}
+
+			// Get additional routing
+			if (method_exists($mod, 'routes')) {
+				foreach ($mod->routes() as $method => $route) {
+					foreach ($route as $key => $value) {
+						if (key_exists(strtoupper($method), $routing) && key_exists($value, $routing[strtoupper($method)])) {
+							$routing[strtoupper($method)][$value] = array_merge_recursive($routing[strtoupper($method)][$value], array($key));
+						} else {
+							$routing[strtoupper($method)][$value] = array($key);
+						}
+					}
+				}
+			}
+
+			self::callGlobalEvent($mod, 'bootstrap');
+		}
+
+		// Add extra routes to module routing
+		foreach ($routing as $method => $routes) {
+			foreach ($routes as $action => $route) {
+				if (!empty($route)) {
+					foreach ($this->getModules() as $module) {
+						foreach ($module->getRoutes() as &$urls) {
+							if ($urls->getRequestMethod() === $method) {
+								if (in_array($action, $urls->getUrls())) {
+									$urls->setUrls(array_merge($urls->getUrls(), $route));
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -104,13 +150,23 @@ class Application extends Base {
 			foreach ($module->getRoutes() as $route) {
 				if ($route->getRequestMethod() === $requestMethod) {
 					foreach ($route->getUrls() as $url) {
-						if (strtolower($url) === strtolower(!empty($uri) ? $uri : '/')) {
+						$checkUri = strtolower(!empty($uri) ? $uri : '/');
+						if (preg_match('#^'.$url.'$#i', $checkUri, $matches) && $checkUri !== '/' || strtolower($url) === $checkUri) {
 
 							$request = new Request();
 							$request->setRoute($route)
 								->setRouteUrl($url)
 								->setUrl($originalUri)
 								->setTheme(self::getTheme());
+
+							// If we matched a regular expression set named groups
+							if ($matches) {
+								foreach ($matches as $key => $value) {
+									if (is_string($key)) {
+										$request->setParam($key, $value);
+									}
+								}
+							}
 
 							$exp = '/(\/?[^\/]*){1,2}/';
 							if (preg_match_all($exp, preg_replace('/^' . str_replace('/', '\/', $url) . '/', '', $originalUri), $matches)) {
@@ -233,6 +289,9 @@ class Application extends Base {
 			$layout->setTemplate($theme->getLayout());
 			$layout->config = $this->getConfig();
 			$layout->request = $this->getRequest();
+//echo '<pre>'; print_r($this->menus);
+//echo '</pre>'; exit;
+			$layout->menus = $this->menus;
 			$layout->theme = $theme;
 			$layout->application = $this;
 			$layout->content = $this->getContent();

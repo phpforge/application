@@ -148,12 +148,12 @@ class View {
 		fclose($fp);
 	}
 
-	protected static $menus = array();
+//	protected static $menus = array();
 
-	public function getMenu($name) {
-		if (!isset(self::$menus)) {
-			self::$menus = $this->callHook('menu');
-		}
-		return key_exists($name, self::$menus) ? self::$menus[$name] : null;
-	}
+//	public function getMenu($name) {
+//		if (!isset(self::$menus)) {
+//			self::$menus = $this->callHook('menu');
+//		}
+//		return key_exists($name, self::$menus) ? self::$menus[$name] : null;
+//	}
 }

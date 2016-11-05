@@ -22,6 +22,11 @@ abstract class Base {
 	protected static $config;
 
 	/**
+	 * @var array
+	 */
+	protected $menus = array();
+
+	/**
 	 * Get config
 	 *
 	 * @return string
