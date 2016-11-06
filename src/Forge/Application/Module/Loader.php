@@ -45,11 +45,11 @@ class Loader extends Base {
 									$urls = array();
 									if (strtolower($methodName) == strtolower($ref->getShortName())) {
 										if (strtolower($method->class) == strtolower(self::$defaultModule) && $methodType == 'GET') {
-											$urls[] = '/';
+											$urls[] =  '/';
 										}
-										$urls[] = '/' . strtolower(preg_replace('/\\\/', '/', $class));
+										$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class));
 									} else {
-										$urls[] = '/' . strtolower(preg_replace('/\\\/', '/', $class) . '/' . $methodName);
+										$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class) . '/' . $methodName);
 									}
 
 									if (!preg_match('/^(event|global|hook)/', $methodName)) {

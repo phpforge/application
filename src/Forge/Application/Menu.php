@@ -113,7 +113,7 @@ class Menu {
 
 		$route = $this->getRoute();
 		if (!empty($route)) {
-			$routes = array_replace_recursive(array($route => array($this->getUri())), $routes);			
+			$routes = array_replace_recursive(array($route => array(preg_replace('#^'.BASE_URI.'#', '', $this->getUri()))), $routes);			
 		}
 		return $routes;
 	}

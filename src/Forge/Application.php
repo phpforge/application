@@ -138,14 +138,14 @@ class Application extends Base {
 	/**
 	 * Build request
 	 *
-	 * @param string  $requestUri    URL
-	 * @param string  $requestMethod Method
-	 * @param integer $depth         Depth
+	 * @param string  $originalUri  Original URI
+	 * @param string  $requestUri   Request URI
+	 * @param string $requestMethod Method
 	 *
 	 * @return mixed
 	 */
 	private function buildRequest($originalUri, $requestUri, $requestMethod) {
-		$uri = preg_replace(array('/\?.*$/', '/[\/]?$/'), '', $requestUri);
+		$uri = preg_replace(array('#^'.BASE_URI.'#', '/\?.*$/', '/[\/]?$/'), '', $requestUri);
 		foreach ($this->getModules() as $module) {
 			foreach ($module->getRoutes() as $route) {
 				if ($route->getRequestMethod() === $requestMethod) {
@@ -289,8 +289,6 @@ class Application extends Base {
 			$layout->setTemplate($theme->getLayout());
 			$layout->config = $this->getConfig();
 			$layout->request = $this->getRequest();
-//echo '<pre>'; print_r($this->menus);
-//echo '</pre>'; exit;
 			$layout->menus = $this->menus;
 			$layout->theme = $theme;
 			$layout->application = $this;
