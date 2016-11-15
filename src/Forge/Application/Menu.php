@@ -104,6 +104,10 @@ class Menu {
 
 	public function getRoutesRecursive() {
 		$routes = array();
+		$route = $this->getRoute();
+		if (!empty($route)) {
+			$routes = array_replace_recursive(array($route => array(preg_replace('#^'.BASE_URI.'#', '', $this->getUri()))), $routes);			
+		}
 		if ($this->hasChildren()) {
 			$children = $this->getChildren();
 			foreach ($children as $child) {
@@ -111,10 +115,6 @@ class Menu {
 			}
 		}
 
-		$route = $this->getRoute();
-		if (!empty($route)) {
-			$routes = array_replace_recursive(array($route => array(preg_replace('#^'.BASE_URI.'#', '', $this->getUri()))), $routes);			
-		}
 		return $routes;
 	}
 

@@ -28,46 +28,40 @@ class Loader extends Base {
 		$modules = array();
 		$classmap = $loader->getClassMap();
 		foreach ($classmap as $class => $file) {
-			if (preg_match('/^phpforge|forge|devforge|module/i', $class) || preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
-				if (class_exists($class)) {
+			if (class_exists($class)) {
+				if (is_subclass_of($class, 'Forge\Application\Module')) {
 					$ref = new \ReflectionClass($class);
 					if ($ref->IsInstantiable()) {
 						$mod = $ref->newInstanceWithoutConstructor();
-						if ($mod instanceof Module) {
+						$routemap = array();
+						$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
+						foreach($methods as $method) {
+							if (preg_match('/Post|Get|Put|Delete$/', $method->name)) {
+								$methodName = preg_replace('/Post|Get|Put|Delete$/', '', $method->name);
+								$methodType = strtoupper(preg_replace('/.*(Post|Get|Put|Delete)$/', '$1', $method->name));
 
-							$routemap = array();
-							$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
-							foreach($methods as $method) {
-								if (preg_match('/Post|Get|Put|Delete$/', $method->name)) {
-									$methodName = preg_replace('/Post|Get|Put|Delete$/', '', $method->name);
-									$methodType = strtoupper(preg_replace('/.*(Post|Get|Put|Delete)$/', '$1', $method->name));
-
-									$urls = array();
-									if (strtolower($methodName) == strtolower($ref->getShortName())) {
-										if (strtolower($method->class) == strtolower(self::$defaultModule) && $methodType == 'GET') {
-											$urls[] =  '/';
-										}
-										$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class));
-									} else {
-										$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class) . '/' . $methodName);
+								$urls = array();
+								if (strtolower($methodName) == strtolower($ref->getShortName())) {
+									if (strtolower($method->class) == strtolower(self::$defaultModule) && $methodType == 'GET') {
+										$urls[] =  '/';
 									}
-
-									if (!preg_match('/^(event|global|hook)/', $methodName)) {
-
-										$route = new Route();
-										$route->setClass($class)
-											->setMethod($method->name)
-											->setRequestMethod($methodType)
-											->setUrls($urls);
-
-										$routemap[] = $route;
-									}
+									$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class));
+								} else {
+									$urls[] =  '/' . strtolower(preg_replace('/\\\/', '/', $class) . '/' . $methodName);
 								}
-							}
 
-							$mod->setRoutes($routemap);
-							$modules[] = $mod;
+								$route = new Route();
+								$route->setClass($class)
+									->setMethod($method->name)
+									->setRequestMethod($methodType)
+									->setUrls($urls);
+
+								$routemap[] = $route;
+							}
 						}
+
+						$mod->setRoutes($routemap);
+						$modules[] = $mod;
 					}
 				}
 			}
