@@ -277,14 +277,14 @@ abstract class Base {
 	 * @throws Exception
 	 */
 	public static function setTheme($name) {
-		if (file_exists(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml')) {
+		if (file_exists(self::getAppDir() . DS . 'themes' . DS . $name . DS . 'layout.phtml')) {
 			self::$theme = new Theme();
 			self::$theme->setName($name)
-				->setDir(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name)
+				->setDir(self::getAppDir() . DS . 'themes' . DS . $name)
 				->setUrl(self::getAppUrl() . '/themes/' . $name)
-				->setLayout(self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml');
+				->setLayout(self::getAppDir() . DS . 'themes' . DS . $name . DS . 'layout.phtml');
 		} else {
-			throw new Exception('Theme dir doesn\'t exist: ' . self::getAppDir() . DS . 'web' . DS . 'themes' . DS . $name . DS . 'layout.phtml');
+			throw new Exception('Theme dir doesn\'t exist: ' . self::getAppDir() . DS . 'themes' . DS . $name . DS . 'layout.phtml');
 		}
 	}
 
