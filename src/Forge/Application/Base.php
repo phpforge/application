@@ -86,7 +86,7 @@ abstract class Base {
 	 */
 	public static function getBaseUri() {
 		if (!self::$baseUri) {
-			self::$baseUri = preg_replace(array('/\/index.php$/', '/\/web$/'), '', filter_input(INPUT_SERVER, 'PHP_SELF'));
+			self::$baseUri = BASE_URI;
 		}
 		return self::$baseUri;
 	}
