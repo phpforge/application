@@ -266,6 +266,9 @@ abstract class Base {
 	 * @return \Forge\Application\Theme
 	 */
 	public static function getTheme() {
+		if (empty(self::$theme)) {
+			self::setTheme('default');
+		}
 		return self::$theme;
 	}
 
