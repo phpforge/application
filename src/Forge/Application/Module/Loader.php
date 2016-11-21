@@ -28,6 +28,13 @@ class Loader extends Base {
 		$modules = array();
 		$classmap = $loader->getClassMap();
 		foreach ($classmap as $class => $file) {
+
+			// The following is required as class_exists, is_subclass_of and ReflectionClass will throw a fatal error if class extends a non-existent class
+			// @todo allow custom namespaces
+			if (!preg_match('/^phpforge|module/i', $class) && !preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
+				continue;
+			}
+
 			if (class_exists($class)) {
 				if (is_subclass_of($class, 'Forge\Application\Module')) {
 					$ref = new \ReflectionClass($class);

@@ -49,7 +49,7 @@ class Application extends Base {
 				$menus = array();
 				foreach ($mod->menus() as $name => $menu) {
 					foreach ($menu as $key => $value) {
-						$routing['GET'] = array_merge_recursive($value->getRoutesRecursive(), $routing);
+						$routing['GET'] = array_merge_recursive($value->getRoutesRecursive(), $routing['GET']);
 						if ($value instanceof Menu) {
 							$menus[$name][$key] = $value->toArray();
 						}
