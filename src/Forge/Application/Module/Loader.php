@@ -3,7 +3,6 @@
 namespace Forge\Application\Module;
 
 use Composer\Autoload\ClassLoader;
-use Forge\Application\Module;
 use Forge\Application\Route;
 use Forge\Application\Base;
 
@@ -31,7 +30,7 @@ class Loader extends Base {
 
 			// The following is required as class_exists, is_subclass_of and ReflectionClass will throw a fatal error if class extends a non-existent class
 			// @todo allow custom namespaces
-			if (!preg_match('/^phpforge|module/i', $class) && !preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
+			if (!preg_match('/^main|phpforge|module/i', $class) && !preg_match('/^' . str_replace('/', '\/', self::getModDir()) . '/i', $file)) {
 				continue;
 			}
 

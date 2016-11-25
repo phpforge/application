@@ -42,7 +42,7 @@ class Application extends Base {
 		$this->setModules(Loader::load($loader));
 		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
 
-		$routing = array();
+		$routing = array('GET' => '');
 		foreach ($this->getModules() as $mod) {
 			// Get routing from menus
 			if (method_exists($mod, 'menus')) {
