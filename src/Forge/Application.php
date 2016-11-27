@@ -34,62 +34,15 @@ class Application extends Base {
 			throw new Exception('You are required to run: composer dump-autoload -o', Http::STATUS_CODE_404);
 		}
 
-		if (session_status() == PHP_SESSION_NONE) {
-			session_start();
-		}
-
 		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'modules');
 		$this->setModules(Loader::load($loader));
 		$this->directoryClassLoader($loader, self::getAppDir() . DS . 'libraries');
 
-		$routing = array('GET' => array());
-		foreach ($this->getModules() as $mod) {
-			// Get routing from menus
-			if (method_exists($mod, 'menus')) {
-				$menus = array();
-				foreach ($mod->menus() as $name => $menu) {
-					foreach ($menu as $key => $value) {
-						$routing['GET'] = array_merge_recursive($value->getRoutesRecursive(), $routing['GET']);
-						if ($value instanceof Menu) {
-							$menus[$name][$key] = $value->toArray();
-						}
-					}
-				}
-				$this->menus = array_replace_recursive($menus, $this->menus);
-			}
-
-			// Get additional routing
-			if (method_exists($mod, 'routes')) {
-				foreach ($mod->routes() as $method => $route) {
-					foreach ($route as $key => $value) {
-						if (key_exists(strtoupper($method), $routing) && key_exists($value, $routing[strtoupper($method)])) {
-							$routing[strtoupper($method)][$value] = array_merge_recursive($routing[strtoupper($method)][$value], array($key));
-						} else {
-							$routing[strtoupper($method)][$value] = array($key);
-						}
-					}
-				}
-			}
-
-			self::callGlobalEvent($mod, 'bootstrap');
+		if (session_status() == PHP_SESSION_NONE) {
+			session_start();
 		}
 
-		// Add extra routes to module routing
-		foreach ($routing as $method => $routes) {
-			foreach ($routes as $action => $route) {
-				if (!empty($route)) {
-					foreach ($this->getModules() as $module) {
-						foreach ($module->getRoutes() as &$urls) {
-							if ($urls->getRequestMethod() === $method) {
-								if (in_array($action, $urls->getUrls())) {
-									$urls->setUrls(array_merge($urls->getUrls(), $route));
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		$this->buildRoutes();
 	}
 
 	/**
@@ -272,6 +225,57 @@ class Application extends Base {
 			call_user_func_array(array($module, $method), array_slice(func_get_args(), 2));
 		}
 		return $this;
+	}
+
+	public function buildRoutes() {
+		$routing = array('GET' => array());
+		foreach ($this->getModules() as $mod) {
+			// Get routing from menus
+			if (method_exists($mod, 'menus')) {
+				$menus = array();
+				foreach ($mod->menus() as $name => $menu) {
+					foreach ($menu as $key => $value) {
+						$routing['GET'] = array_merge_recursive($value->getRoutesRecursive(), $routing['GET']);
+						if ($value instanceof Menu) {
+							$menus[$name][$key] = $value->toArray();
+						}
+					}
+				}
+				$this->menus = array_replace_recursive($menus, $this->menus);
+			}
+
+			// Get additional routing
+			if (method_exists($mod, 'routes')) {
+				foreach ($mod->routes() as $method => $route) {
+					foreach ($route as $key => $value) {
+						if (key_exists(strtoupper($method), $routing) && key_exists($value, $routing[strtoupper($method)])) {
+							$routing[strtoupper($method)][$value] = array_merge_recursive($routing[strtoupper($method)][$value], array($key));
+						} else {
+							$routing[strtoupper($method)][$value] = array($key);
+						}
+					}
+				}
+			}
+
+			self::callGlobalEvent($mod, 'bootstrap');
+		}
+
+		// Add extra routes to module routing
+		foreach ($routing as $method => $routes) {
+			foreach ($routes as $action => $route) {
+				if (!empty($route)) {
+					foreach ($this->getModules() as $module) {
+						foreach ($module->getRoutes() as &$urls) {
+							if ($urls->getRequestMethod() === $method) {
+								if (in_array($action, $urls->getUrls())) {
+									$urls->setUrls(array_merge($urls->getUrls(), $route));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
