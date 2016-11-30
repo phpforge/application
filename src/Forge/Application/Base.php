@@ -409,4 +409,18 @@ abstract class Base {
 		}
 		self::$global[$key] = $value;
 	}
+
+	protected static $roles = array();
+
+	public static function setRoles($roles) {
+		self::$roles = $roles;
+	}
+
+	public static function addRole($role) {
+		self::$roles[] = $role;
+	}
+
+	public static function getRoles() {
+		return self::$roles;
+	}
 }

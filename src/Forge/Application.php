@@ -167,6 +167,14 @@ class Application extends Base {
 					if (method_exists($module, '__construct')) {
 						$module->__construct();
 					}
+
+					/**
+					 * Check ACL
+					 */
+					if (!$this->hasAccess($request)) {
+						throw new \Exception('Access denied');
+					}
+
 					$this->setModule($module);
 
 					$this->callEvent($this->getModule(), 'init')
@@ -278,6 +286,41 @@ class Application extends Base {
 		}
 	}
 
+	public function hasAccess(Request $request) {
+		$acls = $request->getRoute()->getAcls();
+		$roles = self::getRoles();
+		if (!empty($acls)) {
+			foreach ($acls as $acl) {
+				if (in_array($acl, $roles)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public function validateMenu($type, $items) {
+		foreach ($items as $name => &$menu) {
+
+			if (!empty($menu['children'])) {
+				$menu['children'] = $this->validateMenu($name, $menu['children']);
+			}
+
+			$uri = $menu['uri'];
+			if ($uri !== '/' && $uri !== '#') {
+				$request = $this->buildRequest($uri, $uri, 'GET');
+				$access = $this->hasAccess($request);
+				if (!$access) {
+					unset($items[$name]);
+				}
+			} if (empty($menu['children']) && $uri === '#') {
+				unset($items[$name]);
+			}
+		}
+		return $items;
+	}
+
 	/**
 	 * Render
 	 *
@@ -293,6 +336,12 @@ class Application extends Base {
 			$layout->setTemplate($theme->getLayout());
 			$layout->config = $this->getConfig();
 			$layout->request = $this->getRequest();
+
+			$menus = array();
+			foreach ($this->menus as $type => &$menu) {
+				$menu = $this->validateMenu($type, $menu);
+			}
+
 			$layout->menus = $this->menus;
 			$layout->theme = $theme;
 			$layout->application = $this;

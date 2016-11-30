@@ -39,6 +39,24 @@ abstract class Module extends View {
 	}
 
 	/**
+	 * Set roles
+	 *
+	 * @param string $roles Roles
+	 */
+	public function setRoles($roles) {
+		return Application::setRoles($roles);
+	}
+
+	/**
+	 * Add roles
+	 *
+	 * @param string $role Role
+	 */
+	public function addRole($role) {
+		return Application::addRole($role);
+	}
+
+	/**
 	 * Get config
 	 *
 	 * @return string

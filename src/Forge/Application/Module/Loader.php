@@ -39,6 +39,11 @@ class Loader extends Base {
 					$ref = new \ReflectionClass($class);
 					if ($ref->IsInstantiable()) {
 						$mod = $ref->newInstanceWithoutConstructor();
+						$acls = array();
+						if (method_exists($mod, 'acl')) {
+							$acls = $mod->acl();
+						}
+
 						$routemap = array();
 						$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
 						foreach($methods as $method) {
@@ -61,6 +66,10 @@ class Loader extends Base {
 									->setMethod($method->name)
 									->setRequestMethod($methodType)
 									->setUrls($urls);
+
+								if (key_exists($method->name, $acls)) {
+									$route->setAcls($acls[$method->name]);
+								}
 
 								$routemap[] = $route;
 							}

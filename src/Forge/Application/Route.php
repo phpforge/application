@@ -124,6 +124,32 @@ class Route {
 	}
 
 	/**
+	 * @var array
+	 */
+	protected $acls = array();
+
+	/*
+	 * Set ACLs
+	 *
+	 * @param array $acls ACLs
+	 *
+	 * @return self
+	 */
+	public function setAcls($acls) {
+		$this->acls = $acls;
+		return $this;
+	}
+
+	/*
+	 * Get ACLs
+	 *
+	 * @return array Array of ACL's
+	 */
+	public function getAcls() {
+		return $this->acls;
+	}
+
+	/**
 	 * @var Forge\Application\Module
 	 */
 	protected $module;
