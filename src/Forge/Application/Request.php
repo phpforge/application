@@ -170,7 +170,7 @@ class Request {
 
 	public function getVariable($name, $filer = FILTER_DEFAULT, $options = array()) {
 		if (key_exists($name, $this->request)) {
-			return  filter_var($this->request[$name], $filer, $options);
+			return filter_var($this->request[$name], $filer, $options);
 		}
 		return null;
 	}

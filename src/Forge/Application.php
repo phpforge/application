@@ -163,7 +163,7 @@ class Application extends Base {
 			$module = null;
 			$requestClass = $request->getRoute()->getClass();
 			foreach ($this->getModules() as $module) {
-				if ($requestClass == get_class($module)) {
+				if ($requestClass === get_class($module)) {
 					if (method_exists($module, '__construct')) {
 						$module->__construct();
 					}
@@ -176,21 +176,12 @@ class Application extends Base {
 					}
 
 					$this->setModule($module);
-
-					$this->callEvent($this->getModule(), 'init')
-						->callEvent($this->getModule(), 'request', $this->getRequest())
-						->callEvent($this->getModule(), 'route', $this->getRequest()->getRoute());
-
 					$method = $this->getRequest()->getRoute()->getMethod();
 					if (!method_exists($this->getModule(), $method)) {
 						// Should never happen since if we find a module we default to /
 						throw new Exception('Module ' . strtolower($class) . ' does not have method ' . $method, Http::STATUS_CODE_404);
 					} else {
-						$this->callEvent($this->getModule(), 'preAction');
-
 						$result = $module->$method();
-						$this->callEvent($this->getModule(), 'postAction');
-
 						if ($result instanceof View) {
 							$render = $result->render();
 						} else if ($result) {
