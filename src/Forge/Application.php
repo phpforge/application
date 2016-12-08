@@ -80,7 +80,7 @@ class Application extends Base {
 	 * @throws Exception
 	 */
 	public function direct($requestUri, $requestMethod) {
-		$request = $this->buildRequest($requestUri, $requestUri, $requestMethod, $this->getConfig()->routing->depth);
+		$request = $this->buildRequest($requestUri, $requestUri, $requestMethod);
 		if ($request instanceof Request) {
 			return $this->build($request);
 		} else {
@@ -122,7 +122,7 @@ class Application extends Base {
 							}
 
 							$exp = '/(\/?[^\/]*){1,2}/';
-							if (preg_match_all($exp, preg_replace('/^' . str_replace('/', '\/', $url) . '/', '', $originalUri), $matches)) {
+							if (preg_match_all($exp, preg_replace('/.*?'  . str_replace('/', '\/', $url) .  '(.*)$/', '$1', $originalUri), $matches)) {
 								foreach ($matches[0] as $kvp) {
 									list ($key, $value) = array_pad(explode('/', preg_replace('/^\//', '', $kvp), 2), 2, null);
 									if (!empty($key)) {
@@ -156,12 +156,13 @@ class Application extends Base {
 	 */
 	public function build(Request $request) {
 		$this->setRequest($request);
-		$class = $this->getRequest()->getRoute()->getClass();
+		$route = $request->getRoute();
+		$class = $route->getClass();
 		if (!class_exists($class)) {
 			$render = new Exception('Module ' . strtolower($class) . ' does not exist', Http::STATUS_CODE_404);
 		} else {
 			$module = null;
-			$requestClass = $request->getRoute()->getClass();
+			$requestClass = $route->getClass();
 			foreach ($this->getModules() as $module) {
 				if ($requestClass === get_class($module)) {
 					if (method_exists($module, '__construct')) {
@@ -176,8 +177,19 @@ class Application extends Base {
 					}
 
 					$this->setModule($module);
-					$method = $this->getRequest()->getRoute()->getMethod();
-					if (!method_exists($this->getModule(), $method)) {
+					$method = $route->getMethod();
+
+					if ($route->getType() === 'template') {
+						$view = new View();
+						$view->setTemplate($route->getMethod());
+						$params = $request->getParams();
+						if (!empty($params)) {
+							foreach ($params as $key => $value) {
+								$view->$key = $value;
+							}
+						}
+						$this->setContent($view->render());
+					} else if (!method_exists($this->getModule(), $method)) {
 						// Should never happen since if we find a module we default to /
 						throw new Exception('Module ' . strtolower($class) . ' does not have method ' . $method, Http::STATUS_CODE_404);
 					} else {

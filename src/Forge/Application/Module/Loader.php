@@ -45,6 +45,7 @@ class Loader extends Base {
 						}
 
 						$routemap = array();
+						$allUrls = array();
 						$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
 						foreach($methods as $method) {
 							if (preg_match('/Post|Get|Put|Delete$/', $method->name)) {
@@ -63,6 +64,7 @@ class Loader extends Base {
 
 								$route = new Route();
 								$route->setClass($class)
+									->setType('method')
 									->setMethod($method->name)
 									->setRequestMethod($methodType)
 									->setUrls($urls);
@@ -72,6 +74,30 @@ class Loader extends Base {
 								}
 
 								$routemap[] = $route;
+								$allUrls[] = $methodName . ucfirst(strtolower($methodType));
+							}
+						}
+
+						$templateDir = preg_replace('/[^\/]+\/\.\./', '', dirname($file)) . '/' . preg_replace('/.*?([\w]+)$/', '$1', $class)  . '/Template';
+						if (is_dir($templateDir)) {
+							$templates = glob($templateDir . '/*\.get', GLOB_BRACE);
+							if ($templates) {
+								foreach ($templates as $template) {
+									$method = preg_replace_callback('/.*?(\w+)\.([^\.]+)$/', function ($match) {
+										return lcfirst($match[1] . ucfirst($match[2]));
+									}, $template);
+
+									if (!in_array($method, $allUrls)) {
+										$route = new Route();
+										$route->setClass($class)
+											->setType('template')
+											->setMethod($template)
+											->setRequestMethod('GET')
+											->setUrls(array('/' . preg_replace('/\\\/', '/', strtolower($class)) . '/' . preg_replace('/Get/', '', $method)));
+
+										$routemap[] = $route;
+									}
+								}
 							}
 						}
 

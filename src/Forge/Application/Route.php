@@ -43,12 +43,36 @@ class Route {
 	/**
 	 * @var string
 	 */
+	protected $type;
+
+	/*
+	 * Set type
+	 *
+	 * @return string
+	 */
+	public function setType($type) {
+		$this->type = $type;
+		return $this;
+	}
+
+	/*
+	 * Get type
+	 *
+	 * @return string
+	 */
+	public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * @var string
+	 */
 	protected $method;
 
 	/*
 	 * Set method
 	 *
-	 * @return thing
+	 * @return string
 	 */
 	public function setMethod($method) {
 		$this->method = $method;
@@ -72,7 +96,7 @@ class Route {
 	/*
 	 * Set request method
 	 *
-	 * @return thing
+	 * @return string
 	 */
 	public function setRequestMethod($requestMethod) {
 		$this->requestMethod = $requestMethod;
