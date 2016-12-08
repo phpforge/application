@@ -312,10 +312,12 @@ class Application extends Base {
 
 			$uri = $menu['uri'];
 			if ($uri !== '/' && $uri !== '#') {
-				$request = $this->buildRequest($uri, $uri, 'GET');
-				$access = $this->hasAccess($request);
-				if (!$access) {
-					unset($items[$name]);
+				if (!preg_match('/^(http[s]?)?:?\/\//', $uri)) {
+					$request = $this->buildRequest($uri, $uri, 'GET');
+					$access = $this->hasAccess($request);
+					if (!$access) {
+						unset($items[$name]);
+					}
 				}
 			} if (empty($menu['children']) && $uri === '#') {
 				unset($items[$name]);
